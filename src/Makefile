@@ -53,7 +53,7 @@ SUNGCC     = g++
 SUNGcc     = gcc
 
 LNXOPT     = $(SUN64) $(NLGR) -D_REENTRANT -DOO_STD -DLINUX -Wno-deprecated \
-             -D_GNU_SOURCE -g
+             -Wno-c++11-narrowing -D_GNU_SOURCE -g
 LNXOPT_B   = $(SUN64) $(NLGR) -D_REENTRANT -DOO_STD -DLINUX \
              -D_GNU_SOURCE -g
 

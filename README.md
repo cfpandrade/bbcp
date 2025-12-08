@@ -36,7 +36,9 @@ bbcp --version
 
 ### Platform-Specific
 
-#### Ubuntu/Debian (18.04+, 20.04, 22.04, 24.04)
+#### Ubuntu/Debian
+
+**Tested on**: 24.04 LTS, 22.04 LTS, 20.04 LTS, 18.04 LTS
 
 ```bash
 sudo apt-get update
@@ -44,6 +46,8 @@ sudo apt-get install -y build-essential libssl-dev zlib1g-dev g++
 cd src && make
 sudo cp ../bin/*/bbcp /usr/local/bin/
 ```
+
+**Note**: Ubuntu 24.04 uses GCC 13 and OpenSSL 3.0 - fully supported!
 
 #### RHEL/Rocky/AlmaLinux/Fedora
 
