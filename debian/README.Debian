@@ -1,0 +1,51 @@
+bbcp for Debian
+================
+
+This package provides the bbcp (Block Based Copy Protocol) utility for
+high-speed file transfers across networks.
+
+Installation
+------------
+
+The bbcp binary is installed to /usr/bin/bbcp and should be available
+in your PATH immediately after installation.
+
+Usage
+-----
+
+For basic usage examples, run:
+  bbcp -h
+
+For detailed documentation, see:
+  /usr/share/doc/bbcp/README.md
+  /usr/share/doc/bbcp/BUILDING.md
+
+Or visit the project homepage:
+  https://github.com/cfpandrade/bbcp
+
+Quick Example
+-------------
+
+Copy a file to a remote host:
+  bbcp myfile.dat user@remotehost:/path/to/destination
+
+Copy with 8 parallel streams and progress reporting:
+  bbcp -s 8 -P 5 largefile.iso user@remotehost:/backup/
+
+Dependencies
+------------
+
+bbcp requires:
+  - OpenSSL libraries (libssl)
+  - zlib compression library (zlib1g)
+  - POSIX threads support (libc6)
+
+All dependencies are automatically installed with the package.
+
+Support
+-------
+
+For issues and bug reports:
+  https://github.com/cfpandrade/bbcp/issues
+
+ -- Carlos <cfpandrade@users.noreply.github.com>  Sun, 08 Dec 2024 21:29:00 -0500

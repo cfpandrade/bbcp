@@ -1,0 +1,15 @@
+bbcp (1.0.0-1) unstable; urgency=medium
+
+  * Initial Debian package release
+  * Add Ubuntu 24.04 LTS support
+  * Modernize build system and documentation
+  * Full support for GCC 13 and OpenSSL 3.0
+  * Cross-platform support: Linux, macOS, FreeBSD, AIX
+  * Features:
+    - High-speed parallel transfers using multiple TCP streams
+    - Data integrity with MD5, CRC32, and Adler32 checksums
+    - Built-in zlib compression
+    - Real-time progress monitoring
+    - Seamless SSH integration
+
+ -- Carlos <cfpandrade@users.noreply.github.com>  Sun, 08 Dec 2024 21:29:00 -0500

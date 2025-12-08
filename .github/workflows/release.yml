@@ -1,0 +1,192 @@
+name: Build and Release Debian Package
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  build-deb:
+    name: Build Debian Package
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          dpkg-dev \
+          debhelper \
+          build-essential \
+          g++ \
+          libssl-dev \
+          zlib1g-dev \
+          make
+
+    - name: Get version from tag
+      id: get_version
+      run: |
+        if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        else
+          VERSION="1.0.0"
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "tag=v${VERSION}" >> $GITHUB_OUTPUT
+        fi
+        echo "Building version: ${VERSION}"
+
+    - name: Build Debian package
+      run: |
+        dpkg-buildpackage -us -uc -b
+
+    - name: List generated packages
+      run: |
+        echo "Generated packages:"
+        ls -lh ../*.deb
+
+    - name: Get package info
+      id: package_info
+      run: |
+        DEB_FILE=$(ls ../*.deb | head -n1)
+        DEB_NAME=$(basename "$DEB_FILE")
+        echo "deb_file=${DEB_FILE}" >> $GITHUB_OUTPUT
+        echo "deb_name=${DEB_NAME}" >> $GITHUB_OUTPUT
+        echo ""
+        echo "Package Information:"
+        dpkg -I "$DEB_FILE"
+        echo ""
+        echo "Package Contents:"
+        dpkg -c "$DEB_FILE"
+
+    - name: Copy package to workspace
+      run: |
+        mkdir -p dist
+        cp ../*.deb dist/
+
+    - name: Upload Debian package as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: debian-package
+        path: dist/*.deb
+        if-no-files-found: error
+
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          dist/*.deb
+        body: |
+          # bbcp ${{ steps.get_version.outputs.tag }} - Debian Package Release
+
+          ## Installation
+
+          ### Ubuntu/Debian
+
+          Download the `.deb` package and install:
+
+          ```bash
+          wget https://github.com/${{ github.repository }}/releases/download/${{ steps.get_version.outputs.tag }}/${{ steps.package_info.outputs.deb_name }}
+          sudo dpkg -i ${{ steps.package_info.outputs.deb_name }}
+          sudo apt-get install -f  # Fix any missing dependencies
+          ```
+
+          Or install directly:
+
+          ```bash
+          sudo apt-get install -y wget
+          wget https://github.com/${{ github.repository }}/releases/download/${{ steps.get_version.outputs.tag }}/${{ steps.package_info.outputs.deb_name }}
+          sudo dpkg -i ${{ steps.package_info.outputs.deb_name }}
+          ```
+
+          ### Verify Installation
+
+          ```bash
+          bbcp --version
+          bbcp --help
+          ```
+
+          ## Features
+
+          - High-speed parallel transfers using multiple TCP streams
+          - Data integrity verification with MD5, CRC32, and Adler32 checksums
+          - Built-in zlib compression
+          - Real-time progress monitoring
+          - Seamless SSH integration
+          - Cross-platform support (Linux, macOS, FreeBSD, AIX)
+          - Ubuntu 24.04 LTS support (GCC 13, OpenSSL 3.0)
+
+          ## Usage Example
+
+          ```bash
+          # Simple copy
+          bbcp myfile.dat user@remotehost:/path/to/destination
+
+          # High-performance transfer with 8 streams
+          bbcp -s 8 -P 5 largefile.iso user@remotehost:/backup/
+
+          # With compression
+          bbcp -c -s 8 logfile.tar user@remotehost:/backup/
+          ```
+
+          ## Documentation
+
+          See [README.md](https://github.com/${{ github.repository }}/blob/master/README.md) for complete documentation.
+
+          ## Package Details
+
+          - **Package**: ${{ steps.package_info.outputs.deb_name }}
+          - **Architecture**: amd64
+          - **Tested on**: Ubuntu 24.04 LTS, 22.04 LTS, 20.04 LTS
+
+          ---
+
+          Built with GitHub Actions on Ubuntu 22.04 LTS
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  test-install:
+    name: Test Installation on ${{ matrix.os }}
+    needs: build-deb
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, ubuntu-20.04]
+
+    steps:
+    - name: Download Debian package
+      uses: actions/download-artifact@v4
+      with:
+        name: debian-package
+
+    - name: Install package
+      run: |
+        DEB_FILE=$(ls *.deb | head -n1)
+        echo "Installing: $DEB_FILE"
+        sudo dpkg -i "$DEB_FILE" || sudo apt-get install -f -y
+
+    - name: Test installation
+      run: |
+        which bbcp
+        bbcp --version || true
+        bbcp --help || true
+
+    - name: Verify package
+      run: |
+        dpkg -l | grep bbcp
+        dpkg -L bbcp

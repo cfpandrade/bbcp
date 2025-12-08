@@ -1,0 +1,26 @@
+Source: bbcp
+Section: net
+Priority: optional
+Maintainer: Carlos <cfpandrade@users.noreply.github.com>
+Build-Depends: debhelper (>= 10), g++, libssl-dev, zlib1g-dev, make
+Standards-Version: 4.1.3
+Homepage: https://github.com/cfpandrade/bbcp
+
+Package: bbcp
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Block Based Copy Protocol - high-performance file transfer tool
+ bbcp is a file transfer tool designed to transfer large files at high speed
+ across networks. It uses multiple parallel streams to maximize throughput,
+ and supports features like:
+ .
+  - High-speed parallel transfers using multiple TCP streams
+  - Data integrity verification with MD5, CRC32, and Adler32 checksums
+  - Built-in zlib compression to reduce bandwidth usage
+  - Real-time progress monitoring
+  - Seamless integration with SSH for secure transfers
+  - Cross-platform support (Linux, macOS, FreeBSD, AIX)
+ .
+ bbcp is particularly useful for transferring large datasets between
+ research facilities, data centers, or over long-distance networks where
+ traditional tools like scp may be slow.

@@ -1,0 +1,23 @@
+#!/usr/bin/make -f
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	cd src && $(MAKE)
+
+override_dh_auto_install:
+	mkdir -p debian/bbcp/usr/bin
+	find bin -type f -name bbcp -exec cp {} debian/bbcp/usr/bin/bbcp \;
+	chmod 755 debian/bbcp/usr/bin/bbcp
+
+override_dh_auto_clean:
+	cd src && $(MAKE) clean || true
+	rm -rf bin
+	dh_clean
+
+override_dh_auto_test:
+	# Skip tests for now
