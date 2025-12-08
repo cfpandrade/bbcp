@@ -707,6 +707,9 @@ H("host    the location of the file. The default is to use the current host.")
 H("Inspec  the name of the source file(s) (also see -I).")
 H("Outspec the name of the target file or directory (required if >1 input file.\n")
 H("******* Complete details at: http://www.slac.stanford.edu/~abh/bbcp")
+H("")
+H("This package maintained by Carlos Andrade <carlos@perezandrade.com>")
+H("Fork: https://github.com/cfpandrade/bbcp")
 I(bbcp_Version.Version)
 exit(rc);
 }
