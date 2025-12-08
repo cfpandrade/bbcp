@@ -10,7 +10,9 @@ OBJDIR     = ../obj/$(OSVER)
 
 ENVCFLAGS  =    -Dunix -D_BSD -D_ALL_SOURCE
 
-ENVINCLUDE = -I. -I/usr/local/include -I/usr/include 
+ENVINCLUDE = -I. -I/usr/local/include -I/usr/include \
+             -I/opt/homebrew/include -I/opt/homebrew/opt/openssl/include \
+             -I/usr/local/opt/openssl/include 
 
 AIXLIBS    =  -q64 -L/usr/lib -lz -lpthreads
 
@@ -19,7 +21,8 @@ BSDLIBS    =  -L/usr/lib -lz -pthread
 LNXLIBS32  =  -lnsl -lpthread -lrt -lz -lcrypto
 LNXLIBS64  =  -lnsl -lpthread -lrt -lz -lcrypto
 
-MACLIBS    =  -dynamic -L/usr/lib -lz -lpthread -lcrypto
+MACLIBS    =  -dynamic -L/usr/lib -L/opt/homebrew/lib -L/opt/homebrew/opt/openssl/lib \
+              -L/usr/local/lib -L/usr/local/opt/openssl/lib -lz -lpthread -lcrypto
 
 SUNLIBSA   =  /usr/local/lib/libz.a -lposix4 -lsocket -lnsl -lpthread
 SUNLIBS    =  -L/usr/lib -lz -lposix4 -lsocket -lnsl -lpthread
@@ -62,7 +65,8 @@ BSDOPT     = $(SUN64) $(NLGR) -D_REENTRANT -DOO_STD -DFREEBSD -pthread
 BSDCC      = g++
 BSDcc      = gcc
 
-MACOPT     = $(SUN64) $(NLGR) -D_REENTRANT -DOO_STD -DMACOS -Wno-deprecated -g
+MACOPT     = $(SUN64) $(NLGR) -D_REENTRANT -DOO_STD -DMACOS -Wno-deprecated \
+             -Wno-c++11-narrowing -g
 
 MACCC      = g++
 MACcc      = gcc

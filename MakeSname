@@ -65,16 +65,56 @@ elif FileThere x $UNAMF; then
           SYSNAME=sun4x_$RFX
        fi
   elif [ $OSNAME = Linux ]; then
-       case $RLNAME in 2.4*) RFX=24 ;; 2.6*) RFX=26 ;; esac
-       PFX=i386
-       case $MTNAME in i*) PFX=i386 ;; x86_64) PFX=amd64 ;; esac
+       # Modern Linux kernel versions
+       case $RLNAME in
+           2.4*) RFX=24 ;;
+           2.6*) RFX=26 ;;
+           3.*)  RFX=3  ;;
+           4.*)  RFX=4  ;;
+           5.*)  RFX=5  ;;
+           6.*)  RFX=6  ;;
+           *)    RFX=99 ;; # Future/unknown version
+       esac
+       # Architecture detection
+       case $MTNAME in
+           i386|i486|i586|i686) PFX=i386   ;;
+           x86_64)              PFX=amd64  ;;
+           aarch64|arm64)       PFX=arm64  ;;
+           armv7*)              PFX=armv7  ;;
+           ppc64le)             PFX=ppc64le ;;
+           s390x)               PFX=s390x  ;;
+           *)                   PFX=unk    ;;
+       esac
        SYSNAME=${PFX}_linux$RFX
   elif [ $OSNAME = FreeBSD ]; then
        case $RLNAME in 4.2*) RFX=42 ;; 4.3*) RFX=43 ;; 4.4*) RFX=44 ;; esac
        SYSNAME=FreeBSD$RFX
   elif [ $OSNAME = Darwin ]; then
-       case $RLNAME in 8*) RFX=80 ;; 9*) RFX=90 ;; 10*) RFX=100 ;; esac
-       case $MTNAME in ppc*) PFX=ppc ;; i386*) PFX=X86 ;; esac
+       # Modern macOS versions (10.x through 14.x / macOS Sonoma)
+       case $RLNAME in
+           8*)  RFX=80  ;;
+           9*)  RFX=90  ;;
+           10*) RFX=100 ;;
+           11*) RFX=110 ;;
+           12*) RFX=120 ;;
+           13*) RFX=130 ;;
+           14*) RFX=140 ;;
+           15*) RFX=150 ;;
+           20*) RFX=200 ;; # macOS 11 Big Sur
+           21*) RFX=210 ;; # macOS 12 Monterey
+           22*) RFX=220 ;; # macOS 13 Ventura
+           23*) RFX=230 ;; # macOS 14 Sonoma
+           24*) RFX=240 ;; # macOS 15 Sequoia
+           25*) RFX=250 ;; # Future version
+           *)   RFX=999 ;; # Unknown/future version
+       esac
+       case $MTNAME in
+           ppc*)    PFX=ppc   ;;
+           i386*)   PFX=X86   ;;
+           x86_64*) PFX=X86   ;;
+           arm64*)  PFX=ARM64 ;; # Apple Silicon (M1, M2, M3)
+           *)       PFX=UNK   ;;
+       esac
        SYSNAME=${PFX}_darwin_$RFX
   elif [ $OSNAME = AIX ]; then
        case $RLNAME in 2) RFX=42 ;; 3) RFX=43 ;; 4) RFX=44 ;; esac

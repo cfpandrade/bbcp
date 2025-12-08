@@ -1,0 +1,160 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ master, main, develop ]
+  pull_request:
+    branches: [ master, main ]
+  workflow_dispatch:
+
+jobs:
+  build-linux:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, ubuntu-20.04]
+        include:
+          - os: ubuntu-22.04
+            name: "Ubuntu 22.04"
+          - os: ubuntu-20.04
+            name: "Ubuntu 20.04"
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential libssl-dev zlib1g-dev g++ cmake
+
+    - name: Build with Make
+      run: |
+        cd src
+        make
+        cd ..
+
+    - name: Test binary
+      run: |
+        BINARY=$(find bin -name bbcp -type f | head -n1)
+        if [ -x "$BINARY" ]; then
+          echo "Binary found: $BINARY"
+          $BINARY --version || true
+          $BINARY --help || true
+        else
+          echo "ERROR: Binary not found or not executable"
+          exit 1
+        fi
+
+    - name: Build with CMake
+      run: |
+        mkdir -p build
+        cd build
+        cmake ..
+        make
+        ./bbcp --version || true
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: bbcp-${{ matrix.os }}
+        path: bin/*/bbcp
+
+  build-macos:
+    name: Build on macOS
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-13, macos-14]
+        include:
+          - os: macos-13
+            name: "macOS 13 (Intel)"
+          - os: macos-14
+            name: "macOS 14 (Apple Silicon)"
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: |
+        # OpenSSL and zlib should be pre-installed on macOS runners
+        brew list openssl || brew install openssl
+        brew list cmake || brew install cmake
+
+    - name: Build with Make
+      run: |
+        cd src
+        make
+        cd ..
+
+    - name: Test binary
+      run: |
+        BINARY=$(find bin -name bbcp -type f | head -n1)
+        if [ -x "$BINARY" ]; then
+          echo "Binary found: $BINARY"
+          $BINARY --version || true
+          $BINARY --help || true
+        else
+          echo "ERROR: Binary not found or not executable"
+          exit 1
+        fi
+
+    - name: Build with CMake
+      run: |
+        mkdir -p build
+        cd build
+        cmake ..
+        make
+        ./bbcp --version || true
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: bbcp-${{ matrix.os }}
+        path: bin/*/bbcp
+
+  static-analysis:
+    name: Static Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential libssl-dev zlib1g-dev g++ cppcheck
+
+    - name: Run cppcheck
+      run: |
+        cppcheck --enable=warning,style,performance,portability \
+                 --suppress=missingIncludeSystem \
+                 --inline-suppr \
+                 --quiet \
+                 src/ || true
+
+  create-release:
+    name: Create Release Artifacts
+    needs: [build-linux, build-macos]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+      with:
+        path: artifacts
+
+    - name: Display structure
+      run: ls -R artifacts
+
+    - name: Create release info
+      run: |
+        echo "Build date: $(date)" > artifacts/BUILD_INFO.txt
+        echo "Git commit: ${{ github.sha }}" >> artifacts/BUILD_INFO.txt
+        echo "Git ref: ${{ github.ref }}" >> artifacts/BUILD_INFO.txt

@@ -8,32 +8,116 @@ This is a public fork of bbcp, maintained by Carlos. The original bbcp was devel
 
 **Original project**: http://www.slac.stanford.edu/~abh/bbcp
 
-### Installation
+## Features
 
-Ubuntu 12.04 LTS
+- **High-speed parallel transfers** - Uses multiple TCP streams for maximum throughput
+- **Data integrity** - MD5, CRC32, and Adler32 checksumming
+- **Compression** - Built-in zlib compression to reduce bandwidth
+- **Progress monitoring** - Real-time transfer statistics
+- **Secure** - Works seamlessly with SSH
+- **Cross-platform** - Linux, macOS, FreeBSD, AIX support
 
-```sh
-apt-get update
-apt-get install libssl-dev build-essential zlib1g-dev git
-git clone https://github.com/eeertekin/bbcp.git
+## Installation
+
+### Quick Install
+
+```bash
+# Clone the repository
+git clone https://github.com/cfpandrade/bbcp.git
 cd bbcp/src
+
+# Build
 make
-cp ../bin/amd64_linux/bbcp /bin/bbcp
+
+# Install to system PATH
+sudo cp ../bin/*/bbcp /usr/local/bin/
 bbcp --version
 ```
 
-### Examples
-```sh
-    > bbcp -P 2 -w 2M -s 10 my.big.file eee@moon:/top-secret-files/
-    bbcp: Creating /top-secret-files/my.big.file
-    bbcp: At 140506 17:33:18 copy 20% complete; 89998.2 KB/s
-    bbcp: At 140506 17:33:28 copy 41% complete; 89910.4 KB/s
-    bbcp: At 140506 17:33:38 copy 61% complete; 89802.5 KB/s
-    bbcp: At 140506 17:33:48 copy 80% complete; 88499.3 KB/s
-    bbcp: At 140506 17:33:58 copy 96% complete; 84571.9 KB/s
+### Platform-Specific
+
+#### Ubuntu/Debian (18.04+, 20.04, 22.04, 24.04)
+
+```bash
+sudo apt-get update
+sudo apt-get install -y build-essential libssl-dev zlib1g-dev g++
+cd src && make
+sudo cp ../bin/*/bbcp /usr/local/bin/
 ```
 
-### Usage
+#### RHEL/Rocky/AlmaLinux/Fedora
+
+```bash
+sudo dnf install -y gcc-c++ openssl-devel zlib-devel make
+cd src && make
+sudo cp ../bin/*/bbcp /usr/local/bin/
+```
+
+#### macOS
+
+```bash
+# Install Xcode Command Line Tools (if needed)
+xcode-select --install
+
+cd src && make
+sudo cp ../bin/*/bbcp /usr/local/bin/
+```
+
+## Usage Examples
+
+### Basic Copy
+
+```bash
+# Simple file copy
+bbcp sourcefile user@remotehost:/path/to/destination
+
+# Copy directory recursively
+bbcp -r /local/directory user@remotehost:/remote/directory
+```
+
+### High-Performance Transfer
+
+```bash
+# Use 8 parallel streams with 4MB window size, show progress every 5 seconds
+bbcp -s 8 -w 4M -P 5 largefile.dat user@remotehost:/data/
+
+# With compression (useful for text/log files)
+bbcp -c -s 8 -w 4M logfile.tar user@remotehost:/backup/
+
+# Preserve permissions and timestamps
+bbcp -p -r /source/path user@remotehost:/destination/
+```
+
+### Checksum Validation
+
+```bash
+# Enable MD5 checksumming for data integrity
+bbcp -e largefile.iso user@remotehost:/downloads/
+
+# Compute and display MD5 checksum
+bbcp -E md5 file.dat user@remotehost:/data/
+```
+
+### Resume Failed Transfers
+
+```bash
+# Resume a previously interrupted copy
+bbcp -a /resume/directory file.dat user@remotehost:/data/
+```
+
+### Sample Output
+
+```
+> bbcp -P 2 -w 2M -s 10 my.big.file user@server:/destination/
+bbcp: Creating /destination/my.big.file
+bbcp: At 140506 17:33:18 copy 20% complete; 89998.2 KB/s
+bbcp: At 140506 17:33:28 copy 41% complete; 89910.4 KB/s
+bbcp: At 140506 17:33:38 copy 61% complete; 89802.5 KB/s
+bbcp: At 140506 17:33:48 copy 80% complete; 88499.3 KB/s
+bbcp: At 140506 17:33:58 copy 96% complete; 84571.9 KB/s
+```
+
+## Command Line Reference
 
     bbcp [Options] [Inspec] Outspec
 
@@ -108,12 +192,85 @@ bbcp --version
     Inspec  the name of the source file(s) (also see -I).
     Outspec the name of the target file or directory (required if >1 input file.
     
-    ******* Complete details at: http://www.slac.stanford.edu/~abh/bbcp
+**Complete details**: http://www.slac.stanford.edu/~abh/bbcp
+
+## Performance Tips
+
+1. **Tune the number of streams** (`-s`) based on your network:
+   - LAN: 4-8 streams
+   - WAN (long distance): 8-16 streams
+   - Very high latency: 16-32 streams
+
+2. **Adjust window size** (`-w`) for your bandwidth-delay product:
+   - LAN: 2M-4M
+   - WAN: 8M-32M
+   - Transatlantic/Pacific: 64M+
+
+3. **Use compression** (`-c`) for:
+   - Text files, logs, source code
+   - Don't use for already compressed files (videos, archives)
+
+4. **Enable checksums** (`-e`) for:
+   - Critical data transfers
+   - Long-distance transfers
+   - Unreliable networks
+
+## Comparison with Other Tools
+
+| Feature | bbcp | scp | rsync | GridFTP |
+|---------|------|-----|-------|---------|
+| Parallel Streams | ✓ | ✗ | ✗ | ✓ |
+| Built-in Compression | ✓ | ✓ | ✓ | ✓ |
+| Checksumming | ✓ | ✗ | ✓ | ✓ |
+| Resume Capability | ✓ | ✗ | ✓ | ✓ |
+| Progress Display | ✓ | ✗ | ✓ | ✓ |
+| SSH Compatible | ✓ | ✓ | ✓ | ✗ |
+
+## Building from Source
+
+### Quick Build
+
+```bash
+# Using the build script (easiest)
+./build.sh --install
+
+# Using make (traditional)
+cd src && make
+sudo cp ../bin/*/bbcp /usr/local/bin/
+
+# Using CMake (modern)
+mkdir build && cd build && cmake .. && make
+sudo make install
+```
+
+**For detailed build instructions**, see [BUILDING.md](BUILDING.md)
+
+### Prerequisites
+
+- C++ compiler (g++ 7+ or clang++)
+- OpenSSL development libraries
+- zlib development libraries
+- POSIX threads support
+- CMake 3.10+ (optional, for CMake builds)
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit issues or pull requests.
+We welcome contributions! Here's how you can help:
+
+- Report bugs and issues
+- Suggest new features or enhancements
+- Submit pull requests with bug fixes or improvements
+- Improve documentation
+- Share performance tuning tips
+
+## Support
+
+- **Issues**: https://github.com/cfpandrade/bbcp/issues
+- **Original Documentation**: http://www.slac.stanford.edu/~abh/bbcp
+- **Stanford SLAC**: Original authors and maintainers
 
 ## License
 
 This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
+
+Original work Copyright (C) 2002-2012 by the Board of Trustees of the Leland Stanford, Jr., University.
