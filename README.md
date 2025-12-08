@@ -1,7 +1,12 @@
-bbcp
-====
+# bbcp - Block Based Copy Protocol
 
-Securely and quickly copy data from source to target.
+Securely and quickly copy data from source to target using multiple parallel streams.
+
+## About This Fork
+
+This is a public fork of bbcp, maintained by Carlos. The original bbcp was developed at SLAC National Accelerator Laboratory at Stanford University.
+
+**Original project**: http://www.slac.stanford.edu/~abh/bbcp
 
 ### Installation
 
@@ -105,7 +110,10 @@ bbcp --version
     
     ******* Complete details at: http://www.slac.stanford.edu/~abh/bbcp
 
+## Contributing
 
+Contributions are welcome! Please feel free to submit issues or pull requests.
 
+## License
 
-######Forked from http://www.slac.stanford.edu/~abh/bbcp/bbcp.git/
+This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
