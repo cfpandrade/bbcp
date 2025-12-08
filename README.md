@@ -4,7 +4,7 @@ Securely and quickly copy data from source to target using multiple parallel str
 
 ## About This Fork
 
-This is a public fork of bbcp, maintained by Carlos. The original bbcp was developed at SLAC National Accelerator Laboratory at Stanford University.
+This is a public fork of bbcp. The original bbcp was developed at SLAC National Accelerator Laboratory at Stanford University.
 
 **Original project**: http://www.slac.stanford.edu/~abh/bbcp
 
