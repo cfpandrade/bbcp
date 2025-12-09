@@ -75,6 +75,24 @@ jobs:
         mkdir -p dist
         cp ../*.deb dist/
 
+    - name: Generate checksums
+      id: checksums
+      run: |
+        cd dist
+        DEB_FILE=$(ls *.deb | head -n1)
+        echo "Generating checksums for $DEB_FILE"
+        MD5=$(md5sum "$DEB_FILE" | awk '{print $1}')
+        SHA256=$(sha256sum "$DEB_FILE" | awk '{print $1}')
+        echo "md5=$MD5" >> $GITHUB_OUTPUT
+        echo "sha256=$SHA256" >> $GITHUB_OUTPUT
+        echo ""
+        echo "MD5:    $MD5"
+        echo "SHA256: $SHA256"
+        echo ""
+        # Create checksum files
+        md5sum "$DEB_FILE" > "${DEB_FILE}.md5"
+        sha256sum "$DEB_FILE" > "${DEB_FILE}.sha256"
+
     - name: Upload Debian package as artifact
       uses: actions/upload-artifact@v4
       with:
@@ -88,8 +106,15 @@ jobs:
       with:
         files: |
           dist/*.deb
+          dist/*.md5
+          dist/*.sha256
         body: |
           # bbcp ${{ steps.get_version.outputs.tag }} - Debian Package Release
+
+          ## Checksums
+
+          **MD5**: `${{ steps.checksums.outputs.md5 }}`
+          **SHA256**: `${{ steps.checksums.outputs.sha256 }}`
 
           ## Installation
 
