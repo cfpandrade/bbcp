@@ -1,3 +1,11 @@
+bbcp (1.0.1-1) unstable; urgency=medium
+
+  * Add maintainer credit to help output
+  * Display fork maintainer information in bbcp --help
+  * Update version to 1.0.1
+
+ -- Carlos Andrade <carlos@perezandrade.com>  Mon, 09 Dec 2024 00:30:00 -0500
+
 bbcp (1.0.0-1) unstable; urgency=medium
 
   * Initial Debian package release

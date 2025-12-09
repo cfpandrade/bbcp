@@ -646,6 +646,8 @@ H("         [-P sec] [-r] [-R [args]] [-q qos] [-s snum] [-S srcxeq] [-T trgxeq]
 H("         [-t sec] [-v] [-V] [-u loc] [-U wsz] [-w [=]wsz] [-x rate] [-y] [-z]")
 H("         [-Z pnf[:pnl]] [-4 [loc]] [-$] [-#] [--]")
 I("I/Ospec: [user@][host:]file")
+I("")
+I("Maintained by Carlos Andrade <carlos@perezandrade.com>")
 if (rc) exit(rc);
 I("Function: Secure and fast copy utility.")
 I("-a dir  append mode to restart a previously failed copy.")
